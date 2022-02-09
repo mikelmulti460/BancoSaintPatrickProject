@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  API:
+      build: ./dockerfile.dev
+      command: bash -c "python3 manage.py makemigrations && python3 manage.py migrates && python3 manage.py runserver 0.0.0.0:8000"
+      volumes:
+        - ./API:/usr/src/API/
+      ports:
+        - 80:8000
+      depends_on:
+        - db
+      env_file:
+        - ./.env.dev
+  db:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: 'Gr"]DT,3?Eq]vS^aHyQ.$Gq(v*<w6U&J-LwhX2T@b?!46%{Lk,ycur7mS[anFAX<`=cnjS4$gpxA$k9D'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - 5000:5432
+
+volumes:
+  postgres_data:
