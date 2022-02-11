@@ -2,26 +2,27 @@ from django.db import models
 from django.contrib.auth.models import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
 from django.contrib.auth.models import BaseUserManager
+from bank_accounts_api.models import Card
 
 class UserClientManager(BaseUserManager):
     """Manager for Users Client"""
 
-    def create_user(self, email, name, password=None):
+    def create_user(self, email, name, last_name, password=None):
         """Create New User Client"""
         if not email:
             raise ValueError('El usuario debe tener un Email')
         
-        email = self.normalize_email(email)
-        user = self.model()
-
+        email = self.normalize_email(email=email)
+        user = self.model(email=email, name=name, last_name=last_name)
         user.set_password(password)
         user.save(using=self._db)
-
+        card = Card()
+        card.client = user
+        card.generate_card()
         return user
     
-    def create_superuser(self, email, name, password):
-        user = self.create_user(email, name, password)
-
+    def create_superuser(self, email, name, last_name, password):
+        user = self.create_user(email, name, last_name, password)
         user.is_superuser = True
         user.is_staff = True
         user.save(using = self._db)
@@ -35,11 +36,12 @@ class UserClient(AbstractBaseUser, PermissionsMixin):
     last_name = models.CharField(max_length=120)
     is_active = models.BooleanField(default=True)
     is_staff = models.BooleanField(default=False)
+    
 
     objects = UserClientManager()
 
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['name']
+    REQUIRED_FIELDS = ['name','last_name']
 
     def get_full_name(self):
         return self.name
