@@ -136,3 +136,5 @@ AUTH_USER_MODEL = 'clients_api.UserClient'
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+ENCRYPT_KEY = os.environ.get("SECRET_KEY_DATA")

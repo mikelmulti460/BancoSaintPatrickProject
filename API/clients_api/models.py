@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractBaseUser
 from django.contrib.auth.models import PermissionsMixin
 from django.contrib.auth.models import BaseUserManager
 from bank_accounts_api.models import Card
+from django.db.models.signals import post_save
 
 class UserClientManager(BaseUserManager):
     """Manager for Users Client"""
@@ -16,9 +17,6 @@ class UserClientManager(BaseUserManager):
         user = self.model(email=email, name=name, last_name=last_name)
         user.set_password(password)
         user.save(using=self._db)
-        card = Card()
-        card.client = user
-        card.generate_card()
         return user
     
     def create_superuser(self, email, name, last_name, password):
@@ -51,3 +49,11 @@ class UserClient(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return self.email
+
+#signals
+def create_user_card(sender, **kwargs):
+    user = kwargs["instance"]
+    if kwargs["created"]:
+        card = Card()
+        card.create(user)
+post_save.connect(create_user_card, sender=UserClient)
