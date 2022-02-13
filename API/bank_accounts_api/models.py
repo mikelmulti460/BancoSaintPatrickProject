@@ -1,8 +1,8 @@
-
 from datetime import datetime, timedelta
 from random import choice
 from django.db import models
-from utils import ccgen, encryption
+from utils.encryption import Encrypter
+from utils.ccgen import gen_card
 from cryptography.fernet import Fernet
 from django.conf import settings
 
@@ -10,37 +10,56 @@ from django.conf import settings
 #     def create_card
 
 class Card(models.Model):
-    client = models.ForeignKey("clients_api.UserClient", on_delete=models.CASCADE)
-    card_number = models.BigIntegerField(unique=True, blank=False, null=False, primary_key=True)
+    client = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    card_number = models.CharField(max_length=255)
     register_date = models.DateTimeField(auto_now=True)
-    expiration_date = models.DateField(unique=True, blank=False, null=False)
-    ccv = models.IntegerField()
-    account_number = models.BigIntegerField(unique=True, blank=False, null=False)
-    pin = models.IntegerField()
+    expiration_date = models.CharField(max_length=255)
+    ccv = models.CharField(max_length=255)
+    account_number = models.CharField(max_length=50,unique=True, blank=False, null=False)
+    pin = models.CharField(max_length=255)
+    salt = models.CharField(max_length=255)
+    last_digits=models.IntegerField()
     is_active = models.BooleanField(default=True)
 
+    def encrypt_pin(pin,salt):
+        encryp=Encrypter(settings.ENCRYPT_KEY,salt)
+        token = encryp.encrypt_data(pin)
+        return token
+
+    def decrypt_pin(token,salt):
+        encryp=Encrypter(settings.ENCRYPT_KEY,salt)
+        pin = encryp.decrypt_data(token)
+        return pin['data']
+
     @classmethod
-    def create(cls, client, pin):
-        card = cls(client=client, pin=pin)
-        card.pin = encryption.encrypt(ccgen.gen_card(),Fernet(settings.ENCRYPT_KEY+str(cls.pin)))
-        card.card_number = encryption.encrypt(ccgen.gen_card(),Fernet(settings.ENCRYPT_KEY+str(cls.pin)))
-        card.expiration_date = encryption.encrypt(datetime.now() + timedelta(weeks = 144),Fernet(settings.ENCRYPT_KEY+str(cls.pin)))
-        card.ccv = encryption.encrypt(choice(list(range(100,1000))),Fernet(settings.ENCRYPT_KEY+str(cls.pin)))
-        card.account_number = cls.acount_number_validator(cls)
-        card.save()
-        return card
+    def create(cls, client, pin, is_staff):
+        if is_staff == False:
+            encryp=Encrypter(pin)
+            card = cls(client=client)
+            card.salt=encryp.salt_text()
+            card.pin = cls.encrypt_pin(pin,card.salt)
+            new_card = str(gen_card())
+            card.card_number = encryp.encrypt_data(new_card)
+            card.expiration_date = encryp.encrypt_data(datetime.now() + timedelta(weeks = 144))
+            card.ccv = encryp.encrypt_data(choice(list(range(100,1000))))
+            card.account_number = cls.acount_number_validator(cls)
+            last_digits = new_card[-4:]
+            card.last_digits = int(last_digits)
+            card.save()
+            return card
 
     def acount_number_validator(self):
         num = int("2101"+str(choice(range(1000,10000)))+str(choice(range(1000,10000))))
         if self.objects.filter(account_number=num).exists():
             self.acount_number_validator()
         else:
-            return num
+            return str(num)
 
     def decrypt_data(self,pin):
-        cn=encryption.decrypt(self.card_number,Fernet(settings.ENCRYPT_KEY+str(pin)))
-        ccv=encryption.decrypt(self.ccv,Fernet(settings.ENCRYPT_KEY+str(pin)))
-        date=encryption.decrypt(self.expiration_date,Fernet(settings.ENCRYPT_KEY+str(pin)))
+        encryp=Encrypter(pin,self.salt)
+        cn=encryp.decrypt_data(self.card_number)['data']
+        ccv=encryp.decrypt_data(self.ccv)['data']
+        date=encryp.decrypt_data(self.expiration_date)['data']
         return {"card_number":cn,"ccv":ccv,"expiration_date":date}
 
     def get_expense_operations(self):
@@ -60,3 +79,4 @@ class Operations(models.Model):
     type = models.CharField(max_length=12, choices=(('ingreso','ingreso'),('egreso','egreso')))
     origin_account = models.ForeignKey(Card, on_delete=models.CASCADE, null=False, blank=False, related_name="operation_origin")
     destination_account = models.ForeignKey(Card, on_delete=models.CASCADE, null= False, blank= False, related_name='operation_destination')
+

@@ -3,3 +3,8 @@ __pycache__/
 .prod
 API/API/__pycache__/settings.cpython-310.pyc
 *.pyc
+API/utils/pruebas.py
+API/db.sqlite3
+.env.dev
+.env.dev
+.env.dev
