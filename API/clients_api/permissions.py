@@ -1,17 +1,14 @@
 from multiprocessing import Condition
 from rest_framework import permissions
 
-class UpdateUserData(permissions.BasePermission):
+class IsOwnerAndReadOnly(permissions.BasePermission):
 
     def has_object_permission(self, request, view, obj):
-        condition = request.user.is_staff == True
-        if request.method in permissions.SAFE_METHODS and obj.id == request.user.id or condition:
+        if request.method in permissions.SAFE_METHODS and obj.id == request.user.id:
             return True
-        return condition
-
-    def has_permission(self, request, view):
-        condition = request.user.is_staff == True
-        if condition:
-            return True
+        if request.method in ('DELETE',) and request.user.is_staff:
+            return True    
         return False
+
+    
     

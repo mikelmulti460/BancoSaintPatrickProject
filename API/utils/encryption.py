@@ -37,7 +37,7 @@ class Encrypter():
 
     def decrypt_data(self,token):
         if type(token) == str:
-            token.encode('utf-8')
+            token=token.encode('utf-8')
         key = self.generate_key()
         f = Fernet(key)
         return {'data':f.decrypt(token).decode('utf-8'),'status':True }

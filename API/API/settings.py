@@ -25,7 +25,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY","foo")
 
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get("SECRET_KEY","foo")
+DEBUG = bool(os.environ.get("DEBUG",False))
 
 ALLOWED_HOSTS = []
 
@@ -93,6 +93,19 @@ DATABASES = {
 
 }
 
+#REST Framework
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+               'rest_framework.authentication.TokenAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES':(
+                'rest_framework.permissions.IsAuthenticated',
+    ),
+}
+
+if DEBUG == True:
+    REST_FRAMEWORK['DEFAULT_AUTHENTICATION_CLASSES']=('rest_framework.authentication.TokenAuthentication',
+               'rest_framework.authentication.SessionAuthentication',)
 
 # Password validation
 # https://docs.djangoproject.com/en/4.0/ref/settings/#auth-password-validators

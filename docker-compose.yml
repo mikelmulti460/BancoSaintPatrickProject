@@ -3,7 +3,7 @@ version: '3.8'
 services:
   api:
       build: .
-      command: bash -c "python3 fixtures/configure_database.py && python3 manage.py makemigrations && python3 manage.py migrate && python3 manage.py runserver 0.0.0.0:8000"
+      command: bash -c "python3 fixtures/configure_database.py && python3 manage.py makemigrations && python3 manage.py migrate && python3 manage.py shell < fixtures/initSuperUser.py && python3 manage.py runserver 0.0.0.0:8000"
       volumes:
         - ./API:/usr/src/API/
       ports:

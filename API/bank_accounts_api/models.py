@@ -10,7 +10,7 @@ from django.conf import settings
 #     def create_card
 
 class Card(models.Model):
-    client = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    client = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="cards")
     card_number = models.CharField(max_length=255)
     register_date = models.DateTimeField(auto_now=True)
     expiration_date = models.CharField(max_length=255)
@@ -21,15 +21,20 @@ class Card(models.Model):
     last_digits=models.IntegerField()
     is_active = models.BooleanField(default=True)
 
-    def encrypt_pin(pin,salt):
+    def encrypt_pin(self,pin,salt=salt):
         encryp=Encrypter(settings.ENCRYPT_KEY,salt)
         token = encryp.encrypt_data(pin)
         return token
 
-    def decrypt_pin(token,salt):
-        encryp=Encrypter(settings.ENCRYPT_KEY,salt)
-        pin = encryp.decrypt_data(token)
+    def decrypt_pin(self,token=None):
+        encryp=Encrypter(settings.ENCRYPT_KEY,salt=self.salt)
+        pin = encryp.decrypt_data(str(self.pin))
         return pin['data']
+
+    def reset_pin(self,pin):
+        old_pin=self.decrypt_pin(token=self.pin,salt=self.salt)
+        self.pin=self.encrypt_pin(pin=pin,salt=self.salt)
+        return True
 
     @classmethod
     def create(cls, client, pin, is_staff):
