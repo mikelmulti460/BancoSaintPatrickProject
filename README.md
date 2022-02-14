@@ -40,7 +40,7 @@ Configuración de la clave de encriptación
  2. Activación del contenedor
 
     
-    'docker-compose up -d --build
+    docker-compose up -d --build
 
 	> El puerto predeterminado es 80
 	> Puedes acceder mediante localhost:80
