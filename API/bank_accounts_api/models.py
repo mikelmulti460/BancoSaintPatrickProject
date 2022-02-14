@@ -18,10 +18,10 @@ class Card(models.Model):
     account_number = models.CharField(max_length=50,unique=True, blank=False, null=False)
     pin = models.CharField(max_length=255)
     salt = models.CharField(max_length=255)
-    last_digits=models.IntegerField()
+    last_digits=models.CharField(max_length=4)
     is_active = models.BooleanField(default=True)
 
-    def encrypt_pin(self,pin,salt=salt):
+    def encrypt_pin(self,pin,salt):
         encryp=Encrypter(settings.ENCRYPT_KEY,salt)
         token = encryp.encrypt_data(pin)
         return token
@@ -42,14 +42,14 @@ class Card(models.Model):
             encryp=Encrypter(pin)
             card = cls(client=client)
             card.salt=encryp.salt_text()
-            card.pin = cls.encrypt_pin(pin,card.salt)
+            card.pin = cls.encrypt_pin(cls,pin=pin,salt=card.salt)
             new_card = str(gen_card())
             card.card_number = encryp.encrypt_data(new_card)
             card.expiration_date = encryp.encrypt_data(datetime.now() + timedelta(weeks = 144))
             card.ccv = encryp.encrypt_data(choice(list(range(100,1000))))
             card.account_number = cls.acount_number_validator(cls)
             last_digits = new_card[-4:]
-            card.last_digits = int(last_digits)
+            card.last_digits = last_digits
             card.save()
             return card
 

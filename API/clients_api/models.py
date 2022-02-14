@@ -55,9 +55,8 @@ class UserClient(AbstractBaseUser, PermissionsMixin):
 #signals
 def create_user_card(sender, **kwargs):
     user = kwargs["instance"]
-    if kwargs["created"] and user.is_staf == False:
+    if kwargs["created"] and user.is_staff == False:
         card = Card()
-        print(user.is_staff)
         card.create(user, user.pin, user.is_staff)
         user.pin=None
         user.save()

@@ -14,8 +14,8 @@ services:
         - ./.env.dev
   db:
     image: postgres
-    environment:
-      POSTGRES_PASSWORD: "superpassword"
+    env_file:
+        - ./.env.dev
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
