@@ -4,7 +4,7 @@ Usamos Docker para montar el servidor de desarrollo
 
  1. Configurar variables de entorno
 
- Se debe crear un archivo llamado "*.dev.env*" en la ruta principal del proyecto que contenga las siguientes variables
+ Se debe crear un archivo llamado "*.env.dev*" en la ruta principal del proyecto que contenga las siguientes variables
 
     DEBUG=1
 	DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
