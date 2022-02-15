@@ -9,4 +9,4 @@ class ClientCardSerializer(serializers.ModelSerializer):
 class CardSerializer(serializers.ModelSerializer):
     class Meta:
         model=models.Card
-        fields = ("card_number","register_date","expiration_date","ccv")
+        fields = ("card_number","expiration_date","ccv")

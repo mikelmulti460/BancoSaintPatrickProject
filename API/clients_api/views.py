@@ -22,13 +22,45 @@ class HelpApiView(APIView):
                         "Help":{
                             "description": "Retorna una lista de características del API",
                             "url": "api/help/",
-                            "methods":["get",]
+                            "methods":{"get":"Retorna una lista de características del API",},
+                            "acceso":"Usuarios logueados"
                         },
                     },
                 },
                 "clients":{
-                    "description": "Funciones específicas de clientes",
-                }
+                    "description": "Retorna una lista de clientes",
+                    "Views":{
+                        "Clients":{
+                            "ulr":"api/clients/",
+                            "methods":{"get":"Retorna una lista de clientes","post":{"description":"Añade un nuevo cliente","campos":['id', 'email', 'name', 'last_name', 'password', 'pin']}},
+                            "acceso":"SuperUser"
+                        },
+                        "Client":{
+                            "ulr":"api/client/",
+                            "methods":{"get":"Retorna el cliente logueado actualmente"},
+                            "acceso":"Solo cliente logueado"
+                        },
+                    }
+                    
+                },
+                
+                "cards":{
+                    "description": "Retorna la lista de tarjetas del cliente actualmente logueado",
+                    "Views":{
+                        "Cards":{
+                            "ulr":"api/client/cards/",
+                            "methods":{"get":"Retorna la lista de tarjetas del cliente actualmente logueado"},
+                            "acceso":"Solo cliente logueado"
+                        },
+                        "Card":{
+                            "ulr":"api/client/cards/<int:id>",
+                            "methods":{"get":"Retorna los datos de la tarjeta(id) del cliente","post":{"description":"obtiene los datos de la tarjeta desencriptados","campos":{"pin":"integer_field"}}},
+                            "acceso":"Solo cliente logueado"
+                        }
+                    },
+                },
+                
+                
             }
         }
 
