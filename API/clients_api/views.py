@@ -7,7 +7,6 @@ from rest_framework.settings import api_settings
 from rest_framework.permissions import IsAdminUser
 from . import serializers, models, permissions
 from bank_accounts_api.serializers import CardSerializer, ClientCardSerializer
-from bank_accounts_api.models import Card
 
 class HelpApiView(APIView):
     """Class for help about API"""
@@ -91,10 +90,14 @@ class CardAPIView(APIView):
         if pk==None:
             cards = request.user.cards.all()
             card_serializer = ClientCardSerializer(cards,many=True)
+            return Response(card_serializer.data,status.HTTP_200_OK)
         else:
             card = request.user.cards.filter(id=pk).first()
             card_serializer = ClientCardSerializer(card)
-        return Response(card_serializer.data,status.HTTP_200_OK)
+            data={}
+            data.update(card_serializer.data)
+            data["balance"]=card.get_balance()
+            return Response(data,status.HTTP_200_OK)
 
     def post(self, request, pk):
         user = request.user

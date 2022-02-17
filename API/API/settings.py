@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/4.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.0/ref/settings/
 """
-
+import datetime
 from pathlib import Path
 import os
 
@@ -151,3 +151,15 @@ AUTH_USER_MODEL = 'clients_api.UserClient'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 ENCRYPT_KEY = f'{os.environ.get("SECRET_KEY_DATA")}'
+
+JWT_AUTH = {
+    # how long the original token is valid for
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=15),
+
+    # allow refreshing of tokens
+    'JWT_ALLOW_REFRESH': True,
+
+    # this is the maximum time AFTER the token was issued that
+    # it can be refreshed.  exprired tokens can't be refreshed.
+    'JWT_REFRESH_EXPIRATION_DELTA': datetime.timedelta(seconds=15),
+}

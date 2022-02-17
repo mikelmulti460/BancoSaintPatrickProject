@@ -68,20 +68,32 @@ class Card(models.Model):
         return {"card_number":cn,"ccv":ccv,"expiration_date":date}
 
     def get_expense_operations(self):
-        return self.operations_set.filter(type="egreso")
+        return self.operation_sender.all()
 
     def get_income_operations(self):
-        return self.operations_set.filter(type="ingreso")
+        return self.operation_receiver.all()
 
     def get_all_operations(self):
-        return self.operations.all()
+        return self.get_income_operations() | self.get_expense_operations()
+    
+    def get_balance(self):
+        expense=0.0
+        income=0.0
+        print(self.get_expense_operations())
+        print("holaaaa\n\n\n")
+        for operation in self.get_income_operations():
+            income += float(operation.amount)
+        for operation in self.get_expense_operations():
+            expense += float(operation.amount)
+        balance = income-expense
+        return balance
 
-
-class Operations(models.Model):
-    datetime = models.DateTimeField(blank=False, null=False)
+    def __str__(self):
+        return f"{self.client.name} {self.client.last_name}:{self.account_number}"
+class Operation(models.Model):
+    datetime = models.DateTimeField(blank=False, null=False, auto_now=True)
     description = models.CharField(max_length=80, blank=False, null=False)
     amount = models.DecimalField(max_digits=10, decimal_places=2, blank=False, null=False)
-    type = models.CharField(max_length=12, choices=(('ingreso','ingreso'),('egreso','egreso')))
-    origin_account = models.ForeignKey(Card, on_delete=models.CASCADE, null=False, blank=False, related_name="operation_origin")
-    destination_account = models.ForeignKey(Card, on_delete=models.CASCADE, null= False, blank= False, related_name='operation_destination')
-
+    egreso = models.BooleanField()
+    sender_card = models.ForeignKey(Card, on_delete=models.CASCADE, null=False, blank=False, related_name="operation_sender")
+    receiving_card = models.ForeignKey(Card, on_delete=models.CASCADE, null=False, blank=False, related_name="operation_receiver")
