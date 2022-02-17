@@ -53,13 +53,40 @@ class HelpApiView(APIView):
                         },
                         "Card":{
                             "ulr":"api/client/cards/<int:id>",
-                            "methods":{"get":"Retorna los datos de la tarjeta(id) del cliente","post":{"description":"obtiene los datos de la tarjeta desencriptados","campos":{"pin":"integer_field"}}},
+                            "methods":{
+                                "get":"Retorna los datos de la tarjeta(id) del cliente",
+                                "post":{
+                                    "description":"obtiene los datos de la tarjeta desencriptados",
+                                    "campos":{"pin":"integer_field"}
+                                }
+                            },
                             "acceso":"Solo cliente logueado"
                         }
                     },
                 },
                 
-                
+                "operations":{
+                    "description": "crear operaciones bancarias en las tarjetas de los clientes",
+                    "Views":{
+                        "Operations":{
+                            "ulr":"api/client/cards/<int:card>/operations/",
+                            "methods":{
+                                "get":"Retorna una lista de operaciones vinculadas a la tarjeta identificada en parámetro",
+                                "post":{
+                                    "description":"Envia una nueva operación",
+                                    "campos":["description","amount","account_number","pin"]
+                                },
+                            },
+                            "acceso":"Solo cliente logueado"
+                        },
+                        "Card":{
+                            "ulr":"api/client/cards/<int:id>/operations/<int:id>/",
+                            "methods":{"get":"Retorna los datos de la transacción pasada por parámetro"},
+                            "acceso":"Solo cliente logueado"
+                        }
+                    },
+                },
+
             }
         }
 
